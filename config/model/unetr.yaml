@@ -1,0 +1,7 @@
+name: "unetr"
+feature: False
+feature_mode: "mid"
+img_size:
+  - 192
+  - 192
+  - 128

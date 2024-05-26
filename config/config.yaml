@@ -1,0 +1,31 @@
+defaults:
+  - _self_
+  - dataset: brats_volume
+  - model: unet
+  - loss: baseline
+  - optim: sgd
+  - trainer: trainer
+  - scheduler: scheduler
+
+mode: "train"
+epochs: 100
+start_epoch: 0
+batch_size: 32
+test_batch_size: 32
+lr_scheduler: "poly"
+cuda: True
+gpu_ids: "0,1"
+seed: 42
+resume: NULL
+checkname: "test"
+save_to: "results"
+eval_interval: 1
+metrics:
+  - "dice"
+distributed: True
+workers: 6
+trainer: "drop"
+world_size: 2
+
+# torch distributed process group init method
+port: 23456

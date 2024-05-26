@@ -1,0 +1,2 @@
+name: "brats"
+val_ratio: 0.2

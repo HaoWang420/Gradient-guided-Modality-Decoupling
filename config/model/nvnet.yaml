@@ -1,0 +1,8 @@
+name: 'nvnet'
+activation: 'relu'
+normalization: 'group_normalization'
+sampling_mode: 'trilinear'
+vae: False
+feature: False
+feature_mode: 'full'
+input_shape: [160, 192, 128]

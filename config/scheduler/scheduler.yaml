@@ -1,0 +1,2 @@
+lr_decay: 0.7
+patience: 2

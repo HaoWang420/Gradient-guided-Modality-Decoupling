@@ -1,0 +1,7 @@
+name: "feature-adv"
+weights:
+  sim: 0.5
+  full_dice: 0.25
+  drop_dice: 0.25
+distance: 'cosine'
+disc_lr: 0.01

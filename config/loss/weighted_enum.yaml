@@ -1,0 +1,4 @@
+name: "weighted-enum"
+output: "mean"
+missing_num: 3
+

@@ -1,0 +1,6 @@
+name: "input-sim"
+weights:
+  sim: 0.1
+  full_dice: 0.25
+  drop_dice: 0.25
+distance: 'cosine'

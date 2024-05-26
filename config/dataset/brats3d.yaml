@@ -1,0 +1,11 @@
+name: "brats3d"
+val_ratio: 0.2
+channel_shuffle: False
+crop_size:
+  - 128
+  - 128
+  - 128
+val_size:
+  - 200
+  - 200
+  - 128

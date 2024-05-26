@@ -1,0 +1,4 @@
+name: 'mse'
+weights:
+  mse: 0.5
+  dice: 0.5

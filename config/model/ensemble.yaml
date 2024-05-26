@@ -1,0 +1,8 @@
+name: "ensemble"
+
+feature: False
+output: "mean"
+exchange: False
+width_ratio: 1.
+modality_specific_norm: True
+sharing: True

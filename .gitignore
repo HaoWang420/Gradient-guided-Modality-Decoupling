@@ -1,0 +1,42 @@
+# test figs
+*.png
+# python
+*.py[cod]
+run/*
+
+__pycache__
+
+# log files
+*.log
+*.out
+# vim swp files
+*.swp
+*.swo
+
+# idea project file
+.idea
+
+# dataset link
+/datasets
+
+# output logs
+results
+
+#
+.vscode/*
+
+# notebooks
+notebooks/*
+
+# hydra
+.hydra
+/multirun/*
+
+# figs
+figs
+
+# tmp
+tmp/*
+
+# slurm server run
+run.sh

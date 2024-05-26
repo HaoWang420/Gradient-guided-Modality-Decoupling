@@ -1,0 +1,3 @@
+name: "enumeration"
+output: "mean" # mean / list
+missing_num: 3

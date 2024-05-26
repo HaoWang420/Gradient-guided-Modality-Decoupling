@@ -1,0 +1,3 @@
+name: "brats-volume"
+val_ratio: 0.2
+drop: 0

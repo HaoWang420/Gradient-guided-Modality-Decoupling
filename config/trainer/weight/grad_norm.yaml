@@ -1,0 +1,3 @@
+name: 'GradNorm'
+weight_args:
+  alpha: 1.5

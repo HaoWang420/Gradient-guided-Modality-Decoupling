@@ -1,0 +1,5 @@
+defaults:
+  - _self_
+  - weight: grad_norm
+
+name: "MTLTrainer"

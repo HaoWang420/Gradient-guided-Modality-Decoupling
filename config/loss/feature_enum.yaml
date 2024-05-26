@@ -1,0 +1,4 @@
+name: "feature-enum"
+weights:
+  dice: 0.5
+  feature: 0.5
