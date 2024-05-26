@@ -6,6 +6,7 @@ channels:
   - https://repo.anaconda.com/pkgs/main
   - defaults
 dependencies:
+  - python=3.9.6=h12debd9_1
   - _libgcc_mutex=0.1=main
   - argon2-cffi=20.1.0=py39hbd71b63_2
   - backcall=0.2.0=pyhd3eb1b0_0
@@ -114,7 +115,6 @@ dependencies:
   - pyparsing=2.4.7=pyhd3eb1b0_0
   - pyqt=5.9.2=py39h2531618_6
   - pyrsistent=0.17.3=py39hbd71b63_1
-  - python=3.9.6=h12debd9_1
   - python-dateutil=2.8.2=pyhd3eb1b0_0
   - python_abi=3.9=2_cp39
   - pytorch=1.10.1=py3.9_cuda11.1_cudnn8.0.5_0
