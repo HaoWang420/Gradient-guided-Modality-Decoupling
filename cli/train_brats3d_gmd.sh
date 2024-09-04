@@ -5,13 +5,13 @@ python \
     hydra.job.chdir=False \
     world_size=${nnode} \
     distributed=False \
-    mode="train" \
+    mode="save_seg" \
     epochs=600 \
     eval_interval=5 \
     optim=adam \
     optim.lr=8e-4 \
-    batch_size=4 \
-    test_batch_size=8 \
+    batch_size=1 \
+    test_batch_size=1 \
     model="ensemble" \
     model.output="list" \
     model.feature="False" \
@@ -24,4 +24,5 @@ python \
     gpu_ids="'0,1,2,3'" \
     trainer="gmd_trainer" \
     trainer.method="gmd" \
-    checkname="gmd-enum-2-adam-acn"
+    checkname="gmd-enum-2-adam-acn" \
+    resume="results/brats3d-acn/checkpoint.pth.tar"

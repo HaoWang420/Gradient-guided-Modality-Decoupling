@@ -10,11 +10,13 @@ import random
 
 class Brats2018(Dataset):
 
-    def __init__(self, patients_dir, crop_size, modes, train=True):
+    def __init__(self, patients_dir, crop_size, modes, train=True, has_label=True):
         self.patients_dir = patients_dir
         self.modes = modes
         self.train = train
         self.crop_size = crop_size
+        self.has_label = has_label
+
 
     def __len__(self):
         return len(self.patients_dir)
@@ -30,18 +32,26 @@ class Brats2018(Dataset):
             if not mode == "seg":
                 volume = self.normlize(volume)  # [0, 1.0]
             volumes.append(volume)                  # [h, w, d]
-        seg_volume = volumes[-1]
-        volumes = volumes[:-1]
-        volume, seg_volume = self.aug_sample(volumes, seg_volume)
-        wt = seg_volume > 0
-        tc = np.logical_or(seg_volume==1, seg_volume==4)
-        et = seg_volume==4
-        
-        seg_volume = [wt, tc, et]
-        seg_volume = np.concatenate(seg_volume, axis=0).astype("float32")
 
-        return {'image': torch.tensor(volume.copy(), dtype=torch.float),
-                'label': torch.tensor(seg_volume.copy(), dtype=torch.float)}
+        ret = {}
+        ret['origin_shape'] = volumes[0].shape
+        if self.has_label:
+            seg_volume = volumes[-1]
+            volumes = volumes[:-1]
+
+            volume, seg_volume = self.aug_sample(volumes, seg_volume)
+            wt = seg_volume > 0
+            tc = np.logical_or(seg_volume==1, seg_volume==4)
+            et = seg_volume==4
+            
+            seg_volume = [wt, tc, et]
+            seg_volume = np.concatenate(seg_volume, axis=0).astype("float32")
+
+            ret['label'] = torch.tensor(seg_volume.copy(), dtype=torch.float)
+        ret['image'] = torch.tensor(volume.copy(), dtype=torch.float)
+        ret['filename'] = patient_id
+
+        return ret
 
 
     def aug_sample(self, volumes, mask):

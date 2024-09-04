@@ -4,6 +4,9 @@ from dataloaders.datasets.brats import BraTSSet, BraTSVolume
 import os
 import numpy as np
 import torch
+import itertools
+import nibabel as nib
+
 import torch.distributed as dist
 import torch.nn as nn
 import torch.multiprocessing as mp
@@ -41,6 +44,8 @@ def main(args: DictConfig):
         trainer.test(epoch=0)
     elif args.mode == 'test':
         testing(trainer)
+    elif args.mode == 'save_seg':
+        evaluate_and_save_segmentation_maps(trainer, args)
 
     if trainer.cuda_device == 0:
         trainer.writer.close()
@@ -48,6 +53,76 @@ def main(args: DictConfig):
     if args.distributed and dist.get_rank() == 0:
         dist.destroy_process_group()
 
+# evaluate the model under all missing modality scenarios on the validation set and save the segmentation results
+@torch.no_grad()
+def evaluate_and_save_segmentation_maps(trainer, args):
+    trainer.model.eval()
+    trainer.evaluator.reset()
+
+    save_dir = os.path.join(trainer.saver.experiment_dir, 'segmentation_results')
+    os.makedirs(save_dir, exist_ok=True)
+
+    pbar = tqdm(trainer.val_loader, desc='\r')
+
+    # disable pre dice sigmoid/softmax
+    trainer.preprocess = False
+    for l in reversed(range(trainer.nchannels)):
+        for subset in itertools.combinations(list(range(trainer.nchannels)), l):
+            trainer.evaluator.reset()
+            for i, sample in enumerate(pbar):
+                image, target = sample['image'], sample['label']
+                if trainer.args.cuda:
+                    image = image.cuda()
+                    target = target.cuda()
+
+                # forward pass with all missing modality scenarios
+                image_copy = image.clone()
+                for j in subset:
+                    image_copy[:, j] = 0
+                output = trainer.model(image_copy)
+                pred = output.data.cpu().numpy()
+
+                # Save each sample's segmentation maps as nii.gz files
+                for j in range(pred.shape[0]):
+                    pred_map = sigmoid(pred[j]) > 0.5
+                    result = np.zeros(pred_map.shape[1:])
+                    result[pred_map[0]==1] = 1
+                    result[pred_map[1]==1] = 2
+                    result[pred_map[2]==1] = 4
+                    
+                    # evaluate threshold result
+                    trainer.evaluator.add_batch(
+                        target.cpu().numpy(), 
+                        pred_map
+                    )
+
+                    # padding to sample['origin_shape']
+                    origin_shape = sample['origin_shape']
+
+                    # pad size at each dimension
+                    pad_size = [(origin_shape[i][j].item() - result.shape[i]) // 2 for i in range(3)]
+                    result = np.pad(result, ((pad_size[0], pad_size[0]), (pad_size[1], pad_size[1]), (pad_size[2], pad_size[2])))
+                    # print(result.shape)
+                    result = result.astype(np.uint8)
+
+                    save_path = os.path.join(save_dir, 
+                            f'{str(subset).replace(" ", "_").replace("(", "").replace(")", "")}', 
+                            f'{sample["filename"][j]}.nii.gz')
+                    os.makedirs(os.path.dirname(save_path), exist_ok=True)
+                    nib.save(nib.Nifti1Image(result, np.eye(4)), save_path)
+            
+            dice = trainer.evaluator.Dice_score()
+            dice_class = trainer.evaluator.Dice_score_class()
+
+            print(f'Missing modality: {subset}')
+            print(f'Dice: {dice:.4f}')
+            print(f'Dice: {dice_class}')
+
+def sigmoid(x):
+    # prevent numerical overflow
+    x = np.clip(x, -88.72, 88.73)
+
+    return 1 / (1 + np.exp(-x))
 
 def train(trainer, args):
     print('Starting Epoch:', trainer.args.start_epoch)

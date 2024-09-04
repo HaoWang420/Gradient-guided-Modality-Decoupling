@@ -73,6 +73,13 @@ def make_data_loader(args, **kwargs):
         train_list, val_list = split_dataset(Path.getPath('brats3d-acn'), 5, 0)
         train_set = Brats2018(train_list, crop_size=args.dataset.crop_size, modes=("t1", "t1ce", "t2", "flair"), train=True)
         val_set = Brats2018(val_list, crop_size=args.dataset.val_size, modes=("t1", "t1ce", "t2", "flair"), train=False)
+
+    elif args.dataset.name == 'brats3d-val':
+        num_channels = 4
+        num_class = 3
+        patients_dir = glob.glob(os.path.join(Path.getPath(args.dataset.name), "Brats18*"))
+        train_set = Brats2018(patients_dir, crop_size=args.dataset.val_size, modes=("t1", "t1ce", "t2", "flair"), train=False, has_label=False)
+        val_set = Brats2018(patients_dir, crop_size=args.dataset.val_size, modes=("t1", "t1ce", "t2", "flair"), train=False, has_label=False)
         
     else:
         raise NotImplementedError

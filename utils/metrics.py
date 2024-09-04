@@ -4,21 +4,23 @@ import torch.nn.functional as F
 from dataloaders.datasets.brats import BraTSSet
 
 class Evaluator(object):
-    def __init__(self, loss='ce', metrics=['dice']):
+    def __init__(self, loss='ce', metrics=['dice'], preprocess=True):
         self.loss = loss
         self.metrics = metrics
 
         self.mdice = []
         self.dice_class = []
+        self.preprocess = preprocess
     
     def __preprocess(self, y, activation=False):
-        if activation:
-            if self.loss == 'ce':
-                y = np.argmax(y, axis=1)
+        if self.preprocess:
+            if activation:
+                if self.loss == 'ce':
+                    y = np.argmax(y, axis=1)
 
-                y = BraTSSet.transform_label(y)
-            else:
-                y = self.__sigmoid(y)
+                    y = BraTSSet.transform_label(y)
+                else:
+                    y = self.__sigmoid(y)
 
         return y
         
