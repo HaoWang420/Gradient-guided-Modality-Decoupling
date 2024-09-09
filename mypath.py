@@ -13,9 +13,9 @@ class Path(object):
         elif dataset == 'brats3d':
             path = os.path.join(DATASET_ROOT, 'BraTS18TrainingData')
         elif dataset == 'brats3d-acn':
-            path = os.path.join(DATASET_ROOT, 'Brats2018')
+            path = os.path.join(DATASET_ROOT, 'brats18_val/train')
         elif dataset == 'brats3d-val':
-            path = os.path.join(DATASET_ROOT, 'brats18_val')
+            path = os.path.join(DATASET_ROOT, 'brats18_val/val')
         else:
             print('Dataset {} not available.'.format(dataset))
             raise NotImplementedError

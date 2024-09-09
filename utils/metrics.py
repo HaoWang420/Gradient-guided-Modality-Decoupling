@@ -13,14 +13,13 @@ class Evaluator(object):
         self.preprocess = preprocess
     
     def __preprocess(self, y, activation=False):
-        if self.preprocess:
-            if activation:
-                if self.loss == 'ce':
-                    y = np.argmax(y, axis=1)
+        if activation and self.preprocess:
+            if self.loss == 'ce':
+                y = np.argmax(y, axis=1)
 
-                    y = BraTSSet.transform_label(y)
-                else:
-                    y = self.__sigmoid(y)
+                y = BraTSSet.transform_label(y)
+            else:
+                y = self.__sigmoid(y)
 
         return y
         

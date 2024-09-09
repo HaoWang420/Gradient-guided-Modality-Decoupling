@@ -24,10 +24,13 @@ class Brats2018(Dataset):
     def __getitem__(self, index):
         patient_dir = self.patients_dir[index]
         volumes = []
-        modes = list(self.modes) + ['seg']
+        if self.has_label:
+            modes = list(self.modes) + ['seg']
+        else:
+            modes = self.modes
         for mode in modes:
             patient_id = os.path.split(patient_dir)[-1]
-            volume_path = os.path.join(patient_dir, patient_id + "_" + mode + '.nii')
+            volume_path = glob.glob(os.path.join(patient_dir, patient_id + "_" + mode + '.nii*'))[0]
             volume = nib.load(volume_path).get_data()
             if not mode == "seg":
                 volume = self.normlize(volume)  # [0, 1.0]
@@ -48,6 +51,9 @@ class Brats2018(Dataset):
             seg_volume = np.concatenate(seg_volume, axis=0).astype("float32")
 
             ret['label'] = torch.tensor(seg_volume.copy(), dtype=torch.float)
+        else:
+            volume, _ = self.aug_sample(volumes, volumes[-1])
+
         ret['image'] = torch.tensor(volume.copy(), dtype=torch.float)
         ret['filename'] = patient_id
 

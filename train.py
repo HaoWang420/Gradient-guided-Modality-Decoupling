@@ -65,36 +65,50 @@ def evaluate_and_save_segmentation_maps(trainer, args):
     pbar = tqdm(trainer.val_loader, desc='\r')
 
     # disable pre dice sigmoid/softmax
-    trainer.preprocess = False
+    trainer.evaluator.preprocess = False
     for l in reversed(range(trainer.nchannels)):
         for subset in itertools.combinations(list(range(trainer.nchannels)), l):
             trainer.evaluator.reset()
             for i, sample in enumerate(pbar):
-                image, target = sample['image'], sample['label']
+                # image, target = sample['image'], sample['label']
+                image = sample['image']
                 if trainer.args.cuda:
                     image = image.cuda()
-                    target = target.cuda()
 
                 # forward pass with all missing modality scenarios
                 image_copy = image.clone()
                 for j in subset:
                     image_copy[:, j] = 0
-                output = trainer.model(image_copy)
+                output = trainer.model(x=image_copy, channel=subset)
                 pred = output.data.cpu().numpy()
+
+                # pred_thres = sigmoid(pred) > 0.2
+                # result = np.zeros((pred_thres.shape[0], *pred_thres.shape[2:]))
+                # result[pred_thres[:, 0]==1] = 2
+                # result[pred_thres[:, 1]==1] = 1
+                # result[pred_thres[:, 2]==1] = 4
+
+                # wt = result > 0
+                # tc = np.logical_or(result==1, result==4)
+                # et = result==4
+
+                # result = np.stack([wt, tc, et], axis=1).astype("float32")
+
+                # # evaluate threshold result
+                # trainer.evaluator.add_batch(
+                #     target.cpu().numpy(), 
+                #     result,
+                #     # pred,
+                # )
 
                 # Save each sample's segmentation maps as nii.gz files
                 for j in range(pred.shape[0]):
-                    pred_map = sigmoid(pred[j]) > 0.5
+                    pred_map = sigmoid(pred[j]) > 0.2
                     result = np.zeros(pred_map.shape[1:])
-                    result[pred_map[0]==1] = 1
-                    result[pred_map[1]==1] = 2
+                    result[pred_map[0]==1] = 2
+                    result[pred_map[1]==1] = 1
                     result[pred_map[2]==1] = 4
                     
-                    # evaluate threshold result
-                    trainer.evaluator.add_batch(
-                        target.cpu().numpy(), 
-                        pred_map
-                    )
 
                     # padding to sample['origin_shape']
                     origin_shape = sample['origin_shape']
@@ -106,17 +120,17 @@ def evaluate_and_save_segmentation_maps(trainer, args):
                     result = result.astype(np.uint8)
 
                     save_path = os.path.join(save_dir, 
-                            f'{str(subset).replace(" ", "_").replace("(", "").replace(")", "")}', 
+                            f'missing_{str(subset).replace(" ", "_").replace("(", "").replace(")", "")}', 
                             f'{sample["filename"][j]}.nii.gz')
                     os.makedirs(os.path.dirname(save_path), exist_ok=True)
                     nib.save(nib.Nifti1Image(result, np.eye(4)), save_path)
             
-            dice = trainer.evaluator.Dice_score()
-            dice_class = trainer.evaluator.Dice_score_class()
+            # dice = trainer.evaluator.Dice_score()
+            # dice_class = trainer.evaluator.Dice_score_class()
 
             print(f'Missing modality: {subset}')
-            print(f'Dice: {dice:.4f}')
-            print(f'Dice: {dice_class}')
+            # print(f'Dice: {dice:.4f}')
+            # print(f'Dice: {dice_class}')
 
 def sigmoid(x):
     # prevent numerical overflow

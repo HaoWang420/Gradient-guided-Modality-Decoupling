@@ -1,0 +1,9 @@
+name: "brats3d-val"
+crop_size:
+  - 128
+  - 128
+  - 128
+val_size:
+  - 192
+  - 192
+  - 128

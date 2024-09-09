@@ -1,7 +1,6 @@
 import os
 import torch
 import numpy as np
-import numexpr as ne
 import nibabel as nib
 import SimpleITK as itk
 

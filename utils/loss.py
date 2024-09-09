@@ -60,11 +60,40 @@ class SegmentationLosses(object):
             return self.FeatureEnum
         elif mode == 'weighted-enum':
             return self.WeightedEnum
+        elif mode == 'full_enum':
+            return self.FullEnumerationLoss
         elif mode == 'modality-dice':
             return self.ModalityDice
         else:
             print(f'Loss {mode} not available.')
             raise NotImplementedError
+
+    def FullEnumerationLoss(self, logits, target, weights=None):
+        M = len(logits)
+        cnt = 0
+
+        if self.args.loss.output == 'list':
+            loss = []
+        else:
+            loss = 0.
+
+        for missing_num in [0, 1, 2, 3]:
+            for subset in itertools.combinations(list(range(M)), M - missing_num):
+                # let weights sum to 1
+                missing_logits = torch.stack([logits[l] for l in subset], dim=0)
+
+                missing_logits = torch.mean(missing_logits, dim=0)
+
+                if self.args.loss.output == 'list':
+                    loss.append(self.DiceCoef(missing_logits, target))
+                else:
+                    loss += self.DiceCoef(missing_logits, target)
+                cnt += 1
+
+        if self.args.loss.output == 'mean':
+            loss /= cnt
+
+        return loss
     
     def Reconstruction(self, logits, target):
         recons, output = logits
