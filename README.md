@@ -1,5 +1,5 @@
 # Gradient-guided-Modality-Decoupling-for-Missing-Modality-Robustness
-Official implementatation for paper: Gradient-guided Modality Decoupling for Missing Modality Robustness
+Official implementation for paper: Gradient-guided Modality Decoupling for Missing Modality Robustness
 
 ## Environment
 The required libraries are listed in `environment.yml`
