@@ -121,7 +121,7 @@ class Trainer(object):
             print("=> loaded checkpoint '{}' (epoch {})"
                   .format(self.args.resume, checkpoint['epoch']))
             self.args.start_epoch = checkpoint['epoch']
-            self.optimizer.load_state_dict = checkpoint['optimizer']
+            self.optimizer.load_state_dict(checkpoint['optimizer'])
 
     def training(self, epoch):
         self.model.train()
